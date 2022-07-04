@@ -81,7 +81,7 @@ http_archive(
 # libibverbs
 new_local_repository(
     name = "libibverbs",
-    path = "/usr/lib64",
+    path = "/usr/lib",
     build_file_content = """
 cc_library(
     name = "libibverbs",

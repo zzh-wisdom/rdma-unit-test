@@ -23,6 +23,7 @@
 #include "internal/introspection_mlx4.h"
 #include "internal/introspection_mlx5.h"
 #include "internal/introspection_rxe.h"
+#include "internal/introspection_srdma.h"
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);
@@ -38,6 +39,7 @@ int main(int argc, char* argv[]) {
   rdma_unit_test::IntrospectionMlx4::Register();
   rdma_unit_test::IntrospectionMlx5::Register();
   rdma_unit_test::IntrospectionRxe::Register();
+  rdma_unit_test::IntrospectionSrdma::Register();
 
   return RUN_ALL_TESTS();
 }

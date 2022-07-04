@@ -424,6 +424,7 @@ cc_library(
         "//internal:introspection_mlx4",
         "//internal:introspection_mlx5",
         "//internal:introspection_rxe",
+        "//internal:introspection_srdma",
         "@com_glog_glog//:glog",
         "@com_google_absl//absl/debugging:failure_signal_handler",
         "@com_google_absl//absl/flags:parse",

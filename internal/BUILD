@@ -69,6 +69,19 @@ cc_library(
 )
 
 cc_library(
+    name = "introspection_srdma",
+    hdrs = ["introspection_srdma.h"],
+    deps = [
+        ":introspection_registrar",
+        "//public:introspection",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@libibverbs",
+    ],
+    alwayslink = 1,
+)
+
+
+cc_library(
     name = "verbs_extension",
     srcs = ["verbs_extension.cc"],
     hdrs = ["verbs_extension.h"],

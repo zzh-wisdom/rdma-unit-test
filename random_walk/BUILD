@@ -70,6 +70,7 @@ cc_binary(
         "//internal:introspection_mlx4",
         "//internal:introspection_mlx5",
         "//internal:introspection_rxe",
+        "//internal:introspection_srdma",
         "//public:introspection",
         "//random_walk/internal:multi_node_orchestrator",
         "//random_walk/internal:random_walk_config_cc_proto",
