@@ -41,6 +41,9 @@ class IntrospectionSrdma : public NicIntrospection {
 
   bool SupportsRcQp() const override { return false; }
 
+  // Provider does not support cq_ex.
+  bool SupportsExtendedCqs() const override { return false; }
+
  protected:
   const absl::flat_hash_map<TestcaseKey, std::string>& GetDeviations()
       const override {
@@ -79,6 +82,8 @@ class IntrospectionSrdma : public NicIntrospection {
         {{"QpTest", "UnknownType"}, "Can create QPs of unknown type."},
         // Does not handle overflow well.
         {{"SrqTest", "OverflowSrq"}, ""},
+        {{"DeviceLimitTest", "MaxMw"},
+         "Provider does not support MW."},
     };
     return deviations;
   }
