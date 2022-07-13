@@ -32,19 +32,68 @@
 namespace rdma_unit_test {
 
 using ::testing::NotNull;
+using ::testing::IsNull;
 
-class DeviceTest : public RdmaVerbsFixture {};
+class DeviceListTest : public RdmaVerbsFixture {};
 
-TEST_F(DeviceTest, GetDeviceList) {
+TEST_F(DeviceListTest, Basic) {
   int num_devices = 0;
   ibv_device** devices = ibv_get_device_list(&num_devices);
+  ASSERT_GE(num_devices, 0);
   ASSERT_THAT(devices, NotNull());
-  ibv_free_device_list(devices);
+  for(int i = 0; i < num_devices; ++i) {
+    ASSERT_THAT(devices[i], NotNull());
+  }
+  ASSERT_THAT(devices[num_devices], IsNull());
 
-  devices = ibv_get_device_list(nullptr);
+  ibv_free_device_list(devices);
+}
+
+TEST_F(DeviceListTest, GetListByNullParam) {
+  ibv_device** devices = ibv_get_device_list(nullptr);
   ASSERT_THAT(devices, NotNull());
   ibv_free_device_list(devices);
 }
+
+class GetDeviceInfoTest : public RdmaVerbsFixture {};
+
+TEST_F(GetDeviceInfoTest, GetDeviceName) {
+  ibv_device** devices = ibv_get_device_list(nullptr);
+  ASSERT_THAT(devices[0], NotNull());
+  const char *name = ibv_get_device_name(devices[0]);
+  ASSERT_THAT(name, NotNull());
+  LOG(INFO) << "Get device's name: " << name;
+  ASSERT_STREQ(name, devices[0]->name);
+  ibv_free_device_list(devices);
+}
+
+TEST_F(GetDeviceInfoTest, GetDeviceGUID) {
+  ibv_device** devices = ibv_get_device_list(nullptr);
+  ASSERT_THAT(devices[0], NotNull());
+  unsigned long long guid = ibv_get_device_guid(devices[0]);
+  LOG(INFO) << "Get device's guid: " << guid;
+  ibv_context* context = ibv_open_device(devices[0]);
+  ASSERT_THAT(context, NotNull());
+  struct ibv_device_attr device_attr;
+  ASSERT_EQ(ibv_query_device(context, &device_attr), 0);
+  ASSERT_GT(guid, 0);
+  ASSERT_EQ(guid, device_attr.node_guid);
+  ASSERT_EQ(ibv_close_device(context), 0);
+  ibv_free_device_list(devices);
+}
+
+class DeviceTest : public RdmaVerbsFixture {};
+
+// TEST_F(DeviceTest, GetDeviceList) {
+//   int num_devices = 0;
+//   ibv_device** devices = ibv_get_device_list(&num_devices);
+//   ASSERT_THAT(devices, NotNull());
+//   ibv_free_device_list(devices);
+
+//   devices = ibv_get_device_list(nullptr);
+//   ASSERT_THAT(devices, NotNull());
+//   ibv_free_device_list(devices);
+// }
 
 TEST_F(DeviceTest, Open) {
   int num_devices = 0;
@@ -121,6 +170,45 @@ class DeviceLimitTest : public DeviceTest {
   // specifies the tolerable limits.
   static constexpr int kErrorMax = 200;
 };
+
+TEST_F(DeviceLimitTest, DeviceAttrCheck) {
+  ASSERT_OK_AND_ASSIGN(ibv_context * context, ibv_.OpenDevice());
+  ibv_device_attr dev_attr = {};
+  ASSERT_EQ(ibv_query_device(context, &dev_attr), 0);
+  ASSERT_EQ(dev_attr.node_guid, ibv_get_device_guid(context->device));
+  ASSERT_GT(dev_attr.max_mr_size, 0);
+  ASSERT_GE(dev_attr.page_size_cap, 4096);
+  ASSERT_GT(dev_attr.max_qp, 0);
+  ASSERT_GT(dev_attr.max_qp_wr, 0);
+  ASSERT_GT(dev_attr.max_sge, 0);
+  ASSERT_GT(dev_attr.max_sge_rd, 0);
+  ASSERT_GT(dev_attr.max_cq, 0);
+  ASSERT_GT(dev_attr.max_cqe, 0);
+  ASSERT_GT(dev_attr.max_mr, 0);
+  ASSERT_GT(dev_attr.max_pd, 0);
+  ASSERT_GT(dev_attr.max_qp_rd_atom, 0);
+  ASSERT_GE(dev_attr.max_ee_rd_atom, 0);
+  ASSERT_GT(dev_attr.max_res_rd_atom, 0);
+  ASSERT_GT(dev_attr.max_qp_init_rd_atom, 0);
+  ASSERT_GE(dev_attr.max_ee_init_rd_atom, 0);
+  ASSERT_GE(dev_attr.max_ee, 0);
+  ASSERT_GE(dev_attr.max_rdd, 0);
+  ASSERT_GE(dev_attr.max_mw, 0);
+  // 暂忽略：
+  // max_raw_ipv6_qp;
+  // max_raw_ethy_qp;
+  // max_mcast_grp;
+  // max_mcast_qp_attach;
+  // max_total_mcast_qp_attach;
+  ASSERT_GE(dev_attr.max_ah, 0);
+  ASSERT_GE(dev_attr.max_fmr, 0);
+  ASSERT_GE(dev_attr.max_map_per_fmr, 0);
+  ASSERT_GE(dev_attr.max_srq, 0);
+  ASSERT_GE(dev_attr.max_srq_wr, 0);
+  ASSERT_GE(dev_attr.max_srq_sge, 0);
+  ASSERT_GE(dev_attr.max_pkeys, 0);
+  ASSERT_GT(dev_attr.phys_port_cnt, 0);
+}
 
 TEST_F(DeviceLimitTest, MaxAh) {
   ASSERT_OK_AND_ASSIGN(ibv_context * context, ibv_.OpenDevice());
@@ -255,6 +343,66 @@ TEST_F(DeviceLimitTest, MaxSrq) {
   LOG(INFO) << "max_srq = " << max_srq;
   LOG(INFO) << "max_srq (actual) = " << actual_max;
   EXPECT_LE(std::abs(max_srq - actual_max), kErrorMax);
+}
+
+class DevicePortTest : public DeviceTest {};
+
+TEST_F(DevicePortTest, QueryPortBasic) {
+  ASSERT_OK_AND_ASSIGN(ibv_context * context, ibv_.OpenDevice());
+  int port_num = Introspection().device_attr().phys_port_cnt;
+  LOG(INFO) << "phys_port_cnt = " << port_num;
+  struct ibv_port_attr port_attr;
+  for(int i = 1; i <= port_num; ++i) {
+    ASSERT_EQ(ibv_query_port(context, i, &port_attr), 0);
+    ASSERT_LE(port_attr.active_mtu, port_attr.max_mtu);
+    ASSERT_GT(port_attr.gid_tbl_len, 0);
+    ASSERT_GT(port_attr.max_msg_sz, 0);
+  }
+}
+
+TEST_F(DevicePortTest, QueryPortByInvalidPortNum) {
+  ASSERT_OK_AND_ASSIGN(ibv_context * context, ibv_.OpenDevice());
+  int port_num = Introspection().device_attr().phys_port_cnt;
+  LOG(INFO) << "phys_port_cnt = " << port_num;
+  struct ibv_port_attr port_attr;
+  ASSERT_EQ(ibv_query_port(context, 0, &port_attr), EINVAL);
+  ASSERT_EQ(ibv_query_port(context, port_num + 1, &port_attr), EINVAL);
+}
+
+TEST_F(DevicePortTest, QueryGIDBasic) {
+  ASSERT_OK_AND_ASSIGN(ibv_context * context, ibv_.OpenDevice());
+  int port_num = Introspection().device_attr().phys_port_cnt;
+  LOG(INFO) << "phys_port_cnt = " << port_num;
+  struct ibv_port_attr port_attr;
+  union ibv_gid gid;
+  for(int i = 1; i <= port_num; ++i) {
+    ASSERT_EQ(ibv_query_port(context, i, &port_attr), 0);
+    ASSERT_GT(port_attr.gid_tbl_len, 0);
+    for(int idx = 0; idx < port_attr.gid_tbl_len; ++idx) {
+      ASSERT_EQ(ibv_query_gid(context, i, idx, &gid), 0);
+    }
+  }
+}
+
+TEST_F(DevicePortTest, QueryGIDByInvalidParam) {
+  ASSERT_OK_AND_ASSIGN(ibv_context * context, ibv_.OpenDevice());
+  int port_num = Introspection().device_attr().phys_port_cnt;
+  LOG(INFO) << "phys_port_cnt = " << port_num;
+  ASSERT_GT(port_num, 0);
+  struct ibv_port_attr port_attr;
+  ASSERT_EQ(ibv_query_port(context, 1, &port_attr), 0);
+  ASSERT_GT(port_attr.gid_tbl_len, 0);
+  union ibv_gid gid;
+  // port num invalid
+  ASSERT_EQ(ibv_query_gid(context, 0, 0, &gid), -1);
+  ASSERT_EQ(errno, ENOENT);
+  ASSERT_EQ(ibv_query_gid(context, port_num + 1, 0, &gid), -1);
+  ASSERT_EQ(errno, ENOENT);
+  // index  invalid
+  ASSERT_EQ(ibv_query_gid(context, 1, -1, &gid), -1);
+  ASSERT_EQ(errno, ENOENT);
+  ASSERT_EQ(ibv_query_gid(context, 1, port_attr.gid_tbl_len, &gid), -1);
+  ASSERT_EQ(errno, ENOENT);
 }
 
 // TODO(author1): Create Max

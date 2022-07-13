@@ -48,42 +48,32 @@ class IntrospectionSrdma : public NicIntrospection {
   const absl::flat_hash_map<TestcaseKey, std::string>& GetDeviations()
       const override {
     static const absl::flat_hash_map<TestcaseKey, std::string> deviations{
+        {{"DeviceLimitTest", "MaxMw"}, "Provider does not support MW."},
+        {{"PdBindTest", "MwOnOtherPd"}, "Provider does not support MW."},
+        {{"PdBindTest", "MrOnOtherPd"}, "Provider does not support MW."},
+        {{"PdBindTest", "MrMwOnOtherPd"}, "Provider does not support MW."},
+        {{"PdSrqTest", "CreateSrq"}, "Provider does not support srq."},
+        {{"PdSrqTest", "SrqRecvMrSrqMatch"}, "Provider does not support srq."},
+        {{"PdSrqTest", "SrqRecvMrSrqMismatch"}, "Provider does not support srq."},
+        {{"PdType1MwTest", "ReadMwOtherPd"}, "Provider does not support MW."},
+        {{"PdType1MwTest", "WriteMwOtherPd"}, "Provider does not support MW."},
+        {{"PdType1MwTest", "FetchAddMwOtherPd"}, "Provider does not support MW."},
+        {{"PdType1MwTest", "CompSwapMwOtherPd"}, "Provider does not support MW."},
+        {{"PdUdLoopbackTest", "SendAhOnOtherPd"}, "Provider does not support UD connection."},
         // Returns success completion.
         {{"BufferTest", "ZeroByteReadInvalidRKey"}, ""},
         // Zero byte write is successful.
         {{"BufferTest", "ZeroByteWriteInvalidRKey"}, ""},
         // Hardware returns true when requesting notification on a CQ without a
         // Completion Channel.
-        {{"CompChannelTest", "RequestNotificationOnCqWithoutCompChannel"}, ""},
-        {{"CompChannelTest", "AcknowledgeWithoutOutstanding"},
-         "Provider crashes when ack-ing without outstanding completion."},
-        {{"PdRcLoopbackMrTest", "BasicReadMrOtherPdLocal"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicReadMrOtherPdRemote"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicWriteMrOtherPdLocal"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicWriteMrOtherPdRemote"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicFetchAddMrOtherPdLocal"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicFetchAddMrOtherPdRemote"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicCompSwapMrOtherPdLocal"},
-         "Provider does not support PD."},
-        {{"PdRcLoopbackMrTest", "BasicCompSwapMrOtherPdRemote"},
-         "Provider does not support PD."},
-        {{"PdUdLoopbackTest", "SendAhOnOtherPd"},
-         "Provider does not support PD."},
-        {{"SrqPdTest", "SrqRecvMrSrqMatch"}, ""},
-        {{"SrqPdTest", "SrqRecvMrSrqMismatch"}, ""},
+        // {{"CompChannelTest", "RequestNotificationOnCqWithoutCompChannel"}, ""},
+        // {{"CompChannelTest", "AcknowledgeWithoutOutstanding"},
+        //  "Provider crashes when ack-ing without outstanding completion."},
         // TODO(author2): Be more specific.
         {{"QpTest", "OverflowSendWr"}, "Does not handle overflow QP."},
         {{"QpTest", "UnknownType"}, "Can create QPs of unknown type."},
         // Does not handle overflow well.
         {{"SrqTest", "OverflowSrq"}, ""},
-        {{"DeviceLimitTest", "MaxMw"},
-         "Provider does not support MW."},
     };
     return deviations;
   }
