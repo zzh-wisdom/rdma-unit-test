@@ -41,6 +41,8 @@ class IntrospectionSrdma : public NicIntrospection {
 
   bool SupportsRcQp() const override { return false; }
 
+  bool SupportsUdQp() const override { return false; }
+
   // Provider does not support cq_ex.
   bool SupportsExtendedCqs() const override { return false; }
 

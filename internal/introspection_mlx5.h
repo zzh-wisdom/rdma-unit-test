@@ -55,6 +55,7 @@ class IntrospectionMlx5 : public NicIntrospection {
         {{"BufferMwTest", "BindExceedRear"}, ""},
         {{"CompChannelTest", "RequestNotificationInvalidCq"},
          "Invalid CQ handle is not checked."},
+        {{"PdUdLoopbackTest", "SendAhOnOtherPd"}, "Provider does not support UD connection."},
         // Hardware returns true when requesting notification on a CQ without a
         // Completion Channel.
         {{"CompChannelTest", "RequestNotificationOnCqWithoutCompChannel"}, ""},

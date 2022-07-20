@@ -120,6 +120,11 @@ int VerbsHelperSuite::ModifyRcQpRtrToRts(ibv_qp* qp, QpAttribute qp_attr) {
 absl::Status VerbsHelperSuite::SetUpLoopbackRcQps(
     ibv_qp* source_qp, ibv_qp* destination_qp, const PortAttribute& port_attr,
     QpAttribute qp_attr) {
+  ibv_mtu out;
+  std::string error;
+  AbslParseFlag(FLAGS_verbs_mtu.CurrentValue(), &out, &error);
+  qp_attr.set_path_mtu(out);
+  LOG(INFO) << "FLAGS_verbs_mtu: " << FLAGS_verbs_mtu.CurrentValue();
   RETURN_IF_ERROR(ModifyRcQpResetToRts(source_qp, port_attr, port_attr.gid,
                                        destination_qp->qp_num, qp_attr));
   return ModifyRcQpResetToRts(destination_qp, port_attr, port_attr.gid,
