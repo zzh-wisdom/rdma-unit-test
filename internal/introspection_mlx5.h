@@ -40,8 +40,6 @@ class IntrospectionMlx5 : public NicIntrospection {
         });
   }
 
-  bool SupportsRcSendWithInvalidate() const override { return false; }
-
   bool SupportsRcRemoteMwAtomic() const override { return false; }
 
  protected:
@@ -63,6 +61,13 @@ class IntrospectionMlx5 : public NicIntrospection {
         {{"CompChannelTest", "AcknowledgeWithoutOutstanding"}, ""},
         // Will hang.
         {{"CompChannelTest", "AcknowledgeTooMany"}, ""},
+        {{"LoopbackRcQpTest", "SendWithInvalidateNoBuffer"}, "cqe's opcode is wrong when status is not success."},
+        {{"LoopbackRcQpTest", "SendWithInvalidateType1Rkey"}, ""},
+        {{"LoopbackRcQpTest", "SendWithInvalidateBadRkey"}, ""},
+        {{"LoopbackRcQpTest", "SendWithInvalidateWrongQp"}, ""},
+        {{"LoopbackRcQpTest", "Type2MWRead"}, ""},
+        {{"LoopbackRcQpTest", "Type2MWWrite"}, ""},
+        {{"LoopbackRcQpTest", "FetchAddInvalidLKeyAndInvalidRKey"}, ""},
         // Allows invalid SGE size for atomics.
         {{"LoopbackRcQpTest", "FetchAddInvalidSize"}, ""},
         {{"LoopbackRcQpTest", "FetchAddSmallSge"}, ""},

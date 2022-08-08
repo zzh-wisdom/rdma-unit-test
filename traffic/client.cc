@@ -431,7 +431,7 @@ absl::Status Client::PostOps(const OpAttributes& attributes) {
   }
 
   // Create TestOps, WQEs and submit WQEs.
-  for (uint32_t i = 0; i < attributes.num_ops; ++i) {
+  for (int i = 0; i < attributes.num_ops; ++i) {
     uint8_t* initiator_op_addr = initiator_op_addrs[i];
     const uint64_t op_id = initiator_qp_state->GetOpIdAndIncr();
 

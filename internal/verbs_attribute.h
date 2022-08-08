@@ -143,7 +143,7 @@ class QpAttribute {
 
   // Attributes for bringing QP from RTR to RTS state.
   uint32_t sq_psn_ = 1024;  // must match rq_psn in RcRtrRequiredAttr.
-  uint8_t timeout_ = 0;     // infinite timeout
+  uint8_t timeout_ = 6;     // 0: infinite timeout, 6: 262.144us
   uint8_t retry_cnt_ = 5;
   uint8_t rnr_retry_ = 5;
   uint8_t max_rd_atomic_ = 10;

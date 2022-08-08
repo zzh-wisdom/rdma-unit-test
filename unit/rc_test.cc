@@ -79,6 +79,11 @@ class LoopbackRcQpTest : public LoopbackFixture {
                      CreateClient(IBV_QPT_RC, pages, qp_init_attr));
     std::fill_n(remote.buffer.data(), remote.buffer.size(),
                 kRemoteBufferContent);
+    ibv_mtu out;
+    std::string error;
+    AbslParseFlag(FLAGS_verbs_mtu.CurrentValue(), &out, &error);
+    qp_attr.set_path_mtu(out);
+    LOG(INFO) << "FLAGS_verbs_mtu: " << FLAGS_verbs_mtu.CurrentValue();
     RETURN_IF_ERROR(ibv_.ModifyRcQpResetToRts(local.qp, local.port_attr,
                                               remote.port_attr.gid,
                                               remote.qp->qp_num, qp_attr));
@@ -97,7 +102,7 @@ class LoopbackRcQpTest : public LoopbackFixture {
     qp_init_attr.set_max_inline_data(kInlineTestSize[0]);
     ASSIGN_OR_RETURN(Client local,
                      CreateClient(IBV_QPT_RC, kPages, qp_init_attr));
-    for (int idx = 1; idx < kInlineTestSize.size(); ++idx) {
+    for (long unsigned int idx = 1; idx < kInlineTestSize.size(); ++idx) {
       ibv_qp_init_attr init_attr =
           qp_init_attr.set_max_inline_data(kInlineTestSize[idx])
               .GetAttribute(local.cq, local.cq, IBV_QPT_RC);

@@ -385,8 +385,8 @@ TEST_F(SrqRcMultiplexTest, Send) {
   ASSERT_OK_AND_ASSIGN(MultiplexSetup setup,
                        CreateMultiplexSetup(kQueueCount, kOpsPerQueue));
 
-  for (int i = 0; i < kQueueCount; ++i) {
-    for (int j = 0; j < kOpsPerQueue; ++j) {
+  for (uint32_t i = 0; i < kQueueCount; ++i) {
+    for (uint32_t j = 0; j < kOpsPerQueue; ++j) {
       uint32_t wr_id = i * kOpsPerQueue + j;
       uint64_t offset = wr_id * kOpSize;
       ibv_sge sge = verbs_util::CreateSge(
@@ -397,8 +397,8 @@ TEST_F(SrqRcMultiplexTest, Send) {
     }
   }
 
-  for (int i = 0; i < kQueueCount; ++i) {
-    for (int j = 0; j < kOpsPerQueue; ++j) {
+  for (uint32_t  i = 0; i < kQueueCount; ++i) {
+    for (uint32_t  j = 0; j < kOpsPerQueue; ++j) {
       uint32_t wr_id = i * kOpsPerQueue + j;
       uint64_t offset = wr_id * kOpSize;
       ibv_sge sge = verbs_util::CreateSge(
@@ -416,7 +416,7 @@ TEST_F(SrqRcMultiplexTest, Send) {
   }
   // Verify RECVs.
   uint32_t total_ops_count = kQueueCount * kOpsPerQueue;
-  for (int i = 0; i < total_ops_count; ++i) {
+  for (uint32_t i = 0; i < total_ops_count; ++i) {
     ASSERT_OK_AND_ASSIGN(ibv_wc completion, verbs_util::WaitForCompletion(
                                                 setup.basic_setup.recv_cq));
     EXPECT_EQ(completion.status, IBV_WC_SUCCESS);
@@ -432,7 +432,7 @@ TEST_F(SrqRcMultiplexTest, Send) {
       setup.basic_setup.recv_buffer.subspan(0, total_ops_count * kOpSize),
       testing::Each(kSendContent));
 
-  for (int i = 0; i < total_ops_count; ++i) {
+  for (uint32_t i = 0; i < total_ops_count; ++i) {
     ASSERT_OK_AND_ASSIGN(ibv_wc completion, verbs_util::WaitForCompletion(
                                                 setup.basic_setup.send_cq));
     EXPECT_EQ(completion.status, IBV_WC_SUCCESS);
@@ -450,8 +450,8 @@ TEST_F(SrqRcMultiplexTest, WriteWithImmediate) {
   ASSERT_OK_AND_ASSIGN(MultiplexSetup setup,
                        CreateMultiplexSetup(kQueueCount, kOpsPerQueue));
 
-  for (int i = 0; i < kQueueCount; ++i) {
-    for (int j = 0; j < kOpsPerQueue; ++j) {
+  for (uint32_t  i = 0; i < kQueueCount; ++i) {
+    for (uint32_t  j = 0; j < kOpsPerQueue; ++j) {
       uint32_t wr_id = i * kOpsPerQueue + j;
       ibv_recv_wr recv =
           verbs_util::CreateRecvWr(wr_id, /*sge=*/nullptr, /*num_sge=*/0);
@@ -459,8 +459,8 @@ TEST_F(SrqRcMultiplexTest, WriteWithImmediate) {
     }
   }
 
-  for (int i = 0; i < kQueueCount; ++i) {
-    for (int j = 0; j < kOpsPerQueue; ++j) {
+  for (uint32_t i = 0; i < kQueueCount; ++i) {
+    for (uint32_t j = 0; j < kOpsPerQueue; ++j) {
       uint32_t wr_id = i * kOpsPerQueue + j;
       uint64_t offset = wr_id * kOpSize;
       ibv_sge sge = verbs_util::CreateSge(
@@ -484,7 +484,7 @@ TEST_F(SrqRcMultiplexTest, WriteWithImmediate) {
   }
   // Verify RECVs.
   uint32_t total_ops_count = kQueueCount * kOpsPerQueue;
-  for (int i = 0; i < total_ops_count; ++i) {
+  for (uint32_t i = 0; i < total_ops_count; ++i) {
     ASSERT_OK_AND_ASSIGN(ibv_wc completion, verbs_util::WaitForCompletion(
                                                 setup.basic_setup.recv_cq));
     EXPECT_EQ(completion.status, IBV_WC_SUCCESS);
@@ -502,7 +502,7 @@ TEST_F(SrqRcMultiplexTest, WriteWithImmediate) {
       setup.basic_setup.recv_buffer.subspan(0, total_ops_count * kOpSize),
       testing::Each(kSendContent));
 
-  for (int i = 0; i < total_ops_count; ++i) {
+  for (uint32_t i = 0; i < total_ops_count; ++i) {
     ASSERT_OK_AND_ASSIGN(ibv_wc completion, verbs_util::WaitForCompletion(
                                                 setup.basic_setup.send_cq));
     EXPECT_EQ(completion.status, IBV_WC_SUCCESS);

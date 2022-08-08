@@ -39,8 +39,6 @@ class IntrospectionSrdma : public NicIntrospection {
 
   bool SupportsIpV6() const override { return false; }
 
-  bool SupportsRcQp() const override { return false; }
-
   bool SupportsUdQp() const override { return false; }
 
   // Provider does not support cq_ex.
@@ -50,7 +48,22 @@ class IntrospectionSrdma : public NicIntrospection {
   const absl::flat_hash_map<TestcaseKey, std::string>& GetDeviations()
       const override {
     static const absl::flat_hash_map<TestcaseKey, std::string> deviations{
+        //0722:MaxCq test success
+        //cqtest max_cq is success
+        {{"CqTest", "MaxCq"}, ""},
+        {{"CqTest", "CQN"}, ""},
+        {{"CqBatchOpTest", "SendSharedCq"}, ""},
+        {{"CqBatchOpTest", "RecvSharedCq"}, ""},
+        {{"CqOverflowTest", "SendSharedCqOverflow"}, ""},
+        {{"CqOverflowTest", "RecvSharedCqOverflow"}, ""},
+        {{"AhTest", "CreateAndDestroy"}, ""},
+        {{"AhTest", "DestroyWithInvalidHandle"}, ""},
+        {{"AhTest", "DeallocPdWithOutstandingAh"}, ""},
         {{"DeviceLimitTest", "MaxMw"}, "Provider does not support MW."},
+        {{"DeviceLimitTest", "MaxCqMixed"}, "Provider does not support MW."},
+        {{"DeviceLimitTest", "MaxMr"}, "Provider does not support MW."},
+        {{"DeviceLimitTest", "MaxQp"}, "Provider does not support MW."},
+        {{"PdTest", "AllocMwWithInvalidPd"}, "Provider does not support MW."},
         {{"PdBindTest", "MwOnOtherPd"}, "Provider does not support MW."},
         {{"PdBindTest", "MrOnOtherPd"}, "Provider does not support MW."},
         {{"PdBindTest", "MrMwOnOtherPd"}, "Provider does not support MW."},
@@ -68,12 +81,72 @@ class IntrospectionSrdma : public NicIntrospection {
         {{"BufferTest", "ZeroByteWriteInvalidRKey"}, ""},
         // Hardware returns true when requesting notification on a CQ without a
         // Completion Channel.
-        // {{"CompChannelTest", "RequestNotificationOnCqWithoutCompChannel"}, ""},
-        // {{"CompChannelTest", "AcknowledgeWithoutOutstanding"},
-        //  "Provider crashes when ack-ing without outstanding completion."},
-        // TODO(author2): Be more specific.
-        {{"QpTest", "OverflowSendWr"}, "Does not handle overflow QP."},
-        {{"QpTest", "UnknownType"}, "Can create QPs of unknown type."},
+        {{"CompChannelTest", "RequestNotificationOnCqWithoutCompChannel"}, ""},
+        {{"CompChannelTest", "AcknowledgeWithoutOutstanding"},
+         "Provider crashes when ack-ing without outstanding completion."},
+        // QP test
+        {{"QpTest", "CreateWithInvalidSrq"}, "not support srq"},
+        {{"QpTest", "CreateUd"}, "not support ud"},
+        {{"QpTest", "UdModify"}, "not support ud"},
+        {{"QpTest", "UnknownType"},""},
+        {{"QpTest", "MaxSge"},""},
+        {{"QpStateTest", "PostRecvReset"},""},
+        {{"QpStateTest", "PostRecvInit"},""},
+        {{"QpStateTest", "PostSendErr"},""},
+        {{"QpStateTest", "PostRecvErr"},""},
+        {{"QpStateTest", "ModRtsToError"},""},
+        {{"QpStateTest", "RtsSendToRtr"},""},
+        {{"QpPostTest", "OverflowSendWr"},""},
+        //RC test SendEmptySgl
+        {{"LoopbackRcQpTest", "SendEmptySgl"},"unsolved"},
+        {{"LoopbackRcQpTest", "SendZeroSize"},""},
+        {{"LoopbackRcQpTest", "SendInlineData"},""},
+        {{"LoopbackRcQpTest", "SendExceedMaxInlineData"},""},
+        {{"LoopbackRcQpTest", "SendInlineDataInvalidOp"},""},
+        {{"LoopbackRcQpTest", "SendImmData"},""},
+        {{"LoopbackRcQpTest", "SendWithInvalidateType1Rkey"},""},
+        {{"LoopbackRcQpTest", "SendWithTooSmallRecv"},""},
+        {{"LoopbackRcQpTest", "SendRnrInfiniteRetries"},""},
+        {{"LoopbackRcQpTest", "BadRecvAddr"},""},
+        {{"LoopbackRcQpTest", "RecvOnDeregisteredRegion"},""},
+        {{"LoopbackRcQpTest", "RecvPayloadExceedMr"},""},
+        {{"LoopbackRcQpTest", "BadRecvLkey"},""},
+        {{"LoopbackRcQpTest", "BasicRead"},""},
+        {{"LoopbackRcQpTest", "BasicReadLargePayload"},""},
+        {{"LoopbackRcQpTest", "QpSigAll"},""},
+        {{"LoopbackRcQpTest", "Type1MWRead"},""},
+        {{"LoopbackRcQpTest", "Type1MWUnbind"},""},
+        {{"LoopbackRcQpTest", "WriteInlineData"},""},
+        {{"LoopbackRcQpTest", "WriteZeroByteWithImmData"},""},
+        {{"LoopbackRcQpTest", "WriteImmDataInvalidRKey"},""},
+        {{"LoopbackRcQpTest", "Type1MWWrite"},""},
+        {{"LoopbackRcQpTest", "FetchAddNoOp"},""},
+        {{"LoopbackRcQpTest", "FetchAddSmallSge"},""},
+        {{"LoopbackRcQpTest", "FetchAddLargeSge"},""},
+        {{"LoopbackRcQpTest", "FetchAddSplitSgl"},""},
+        {{"LoopbackRcQpTest", "UnsignaledFetchAdd"},""},
+        {{"LoopbackRcQpTest", "FetchAddIncrementBy1"},""},
+        {{"LoopbackRcQpTest", "FetchAddLargeIncrement"},""},
+        {{"LoopbackRcQpTest", "FetchAddUnaligned"},""},
+        {{"LoopbackRcQpTest", "FetchAddUnalignedInvalidLKey"},""},
+        {{"LoopbackRcQpTest", "FetchAddUnalignedInvalidRKey"},""},
+        {{"LoopbackRcQpTest", "CompareSwapNotEqualNoSwap"},""},
+        {{"LoopbackRcQpTest", "CompareSwapEqualWithSwap"},""},
+        {{"LoopbackRcQpTest", "UnsignaledCompareSwap"},""},
+        {{"LoopbackRcQpTest", "CompareSwapInvalidRKey"},""},
+        {{"LoopbackRcQpTest", "CompareSwapInvalidRKeyAndInvalidLKey"},""},
+        {{"LoopbackRcQpTest", "CompareSwapUnaligned"},""},
+        {{"LoopbackRcQpTest", "CompareSwapUnalignedInvalidRKey"},""},
+        {{"LoopbackRcQpTest", "CompareSwapUnalignedInvalidLKey"},""},
+        {{"LoopbackRcQpTest", "CompareSwapInvalidSize"},""},
+        {{"LoopbackRcQpTest", "SgePointerChase"},""},
+        {{"LoopbackRcQpTest", "RemoteFatalError"},""},
+        {{"LoopbackRcQpTest", "FullSubmissionQueue"},""},
+        {{"LoopbackRcQpTest", "FlushErrorPollTogether"},""},
+        {{"RemoteRcQpStateTest", "RemoteRcQpStateTests"},""},
+        //srdma test end
+        {{"SrqPdTest", "SrqRecvMrSrqMatch"}, ""},
+        {{"SrqPdTest", "SrqRecvMrSrqMismatch"}, ""},
         // Does not handle overflow well.
         {{"SrqTest", "OverflowSrq"}, ""},
     };
